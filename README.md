@@ -11,6 +11,6 @@ pip install --user git+https://github.com/gzj/cntdrun.git
 ## Quick Start
 ```
 cntdrun [count] [command]
-cntdrun 6 "bash -c ls" 
-cntdrun 10 "echo 'Countdown finished!'" --label-font "Times" --label-size 40 --label-x 30 --label-y 10 --label-width 190 --label-height 60 --button-text "Exit" --button-x 90 --button-y 90 --button-width 70 --button-height 40 --button-font "Helvetica" --button-size 12
+cntdrun 3 "bash -c ls" 
+cntdrun 3 "echo 'Countdown finished!'" --label-font "Times" --label-size 40 --button-text "Exit" --button-font "Helvetica" --button-size 12 --window-x 100 --window-y 100 --window-width 300 --window-height 200 --command-label "test"
 ```
