@@ -2,42 +2,60 @@ import sys
 import argparse
 import subprocess
 from importlib.metadata import version
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QDesktopWidget
 from PyQt5.QtGui import QFont
-from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtCore import QTimer, Qt, QSize
 
 class CountdownWindow(QMainWindow):
-    def __init__(self, count, command, label_font, label_size, label_x, label_y, label_width, label_height,
-                 button_text, button_x, button_y, button_width, button_height, button_font, button_size, parent=None):
+    def __init__(self, count, command, window_width, window_height,
+                 label_font, label_size, button_text, button_font, button_size,
+                 window_x, window_y, parent=None):
         super().__init__(parent)
         self.setWindowTitle("ctndrun")
-        self.setGeometry(0, 0, 250, 150)
         self.setStyleSheet(
-            "border: 1px solid green; color: green; background-color: black;"
+            "QMainWindow {border: 1px solid green; background-color: black;}"
+            "QLabel {border: 1px solid black; color: green;}"
+            "QPushButton {background-color: black; color: green; border: 1px solid green;}"
         )
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
-        screen = QApplication.desktop().screenGeometry()
-        x = int((screen.width() - self.width()) / 2)
-        y = int((screen.height() - self.height()) / 2)
-        self.move(x, y)
 
-        self.countdown_label = QLabel(self)
+        self.resize(window_width, window_height)
+        if window_x is not None and window_y is not None:
+            self.move(window_x, window_y)
+        else:
+            self.center()
+
+        central_widget = QWidget(self)
+        self.setCentralWidget(central_widget)
+        main_layout = QVBoxLayout(central_widget)
+
+        self.countdown_label = QLabel(str(count))
         self.countdown_label.setFont(QFont(label_font, label_size))
-        self.countdown_label.setGeometry(label_x, label_y, label_width, label_height)
         self.countdown_label.setAlignment(Qt.AlignCenter)
-        self.countdown_label.setStyleSheet("border: 1px solid black;")
+        main_layout.addWidget(self.countdown_label, 1)
 
-        self.close_button = QPushButton(button_text, self)
+        button_layout = QHBoxLayout()
+        main_layout.addLayout(button_layout)
+
+        self.close_button = QPushButton(button_text)
         self.close_button.setFont(QFont(button_font, button_size))
-        self.close_button.setGeometry(button_x, button_y, button_width, button_height)
         self.close_button.clicked.connect(self.close)
+        self.close_button.setFixedSize(QSize(80, 30))
+        button_layout.addStretch(1)
+        button_layout.addWidget(self.close_button)
+        button_layout.addStretch(1)
 
         self.countdown = count
-        self.timer = QTimer()
+        self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_countdown)
         self.timer.start(1000)
         self.command = command
-        self.countdown_label.setText(str(self.countdown))
+
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
 
     def update_countdown(self):
         if self.countdown > 0:
@@ -78,18 +96,14 @@ def main():
     parser.add_argument("command", type=str, help="Command to execute after countdown")
     parser.add_argument('--version', action='version', version=version("cntdrun"))
     
-    # Arguments for customization
+    parser.add_argument("--window-width", type=int, default=250, help="Width of the window")
+    parser.add_argument("--window-height", type=int, default=150, help="Height of the window")
+    parser.add_argument("--window-x", type=int, default=None, help="X position of the window")
+    parser.add_argument("--window-y", type=int, default=None, help="Y position of the window")
+    
     parser.add_argument("--label-font", type=str, default="Arial", help="Font for countdown label")
     parser.add_argument("--label-size", type=int, default=32, help="Font size for countdown label")
-    parser.add_argument("--label-x", type=int, default=50, help="X position of countdown label")
-    parser.add_argument("--label-y", type=int, default=20, help="Y position of countdown label")
-    parser.add_argument("--label-width", type=int, default=150, help="Width of countdown label")
-    parser.add_argument("--label-height", type=int, default=50, help="Height of countdown label")
     parser.add_argument("--button-text", type=str, default="close", help="Text for close button")
-    parser.add_argument("--button-x", type=int, default=100, help="X position of close button")
-    parser.add_argument("--button-y", type=int, default=100, help="Y position of close button")
-    parser.add_argument("--button-width", type=int, default=50, help="Width of close button")
-    parser.add_argument("--button-height", type=int, default=30, help="Height of close button")
     parser.add_argument("--button-font", type=str, default="Arial", help="Font for close button")
     parser.add_argument("--button-size", type=int, default=10, help="Font size for close button")
 
@@ -98,9 +112,10 @@ def main():
     app = QApplication(sys.argv)
     window = CountdownWindow(
         args.count, args.command,
-        args.label_font, args.label_size, args.label_x, args.label_y, args.label_width, args.label_height,
-        args.button_text, args.button_x, args.button_y, args.button_width, args.button_height,
-        args.button_font, args.button_size
+        args.window_width, args.window_height,
+        args.label_font, args.label_size,
+        args.button_text, args.button_font, args.button_size,
+        args.window_x, args.window_y
     )
     window.show()
     sys.exit(app.exec_())
