@@ -9,11 +9,12 @@ from PyQt5.QtCore import QTimer, Qt, QSize
 class CountdownWindow(QMainWindow):
     def __init__(self, count, command, window_width, window_height,
                  label_font, label_size, button_text, button_font, button_size,
-                 window_x, window_y, parent=None):
+                 window_x, window_y, command_label_text, parent=None):
         super().__init__(parent)
         self.setWindowTitle("ctndrun")
         self.setStyleSheet(
             "QMainWindow {border: 1px solid green; background-color: black;}"
+            "QLabel { background-color: black; }"
             "QLabel {border: 1px solid black; color: green;}"
             "QPushButton {background-color: black; color: green; border: 1px solid green;}"
         )
@@ -28,6 +29,13 @@ class CountdownWindow(QMainWindow):
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
+
+
+        self.command_label = QLabel(command_label_text if command_label_text else f"Command: {command}")
+        self.command_label.setFont(QFont(label_font, label_size // 2))
+        self.command_label.setAlignment(Qt.AlignCenter)
+        self.command_label.setWordWrap(True)
+        main_layout.addWidget(self.command_label)
 
         self.countdown_label = QLabel(str(count))
         self.countdown_label.setFont(QFont(label_font, label_size))
@@ -94,8 +102,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("count", type=int, help="Countdown time in seconds")
     parser.add_argument("command", type=str, help="Command to execute after countdown")
-    parser.add_argument('--version', action='version', version=version("cntdrun"))
     
+    parser.add_argument("--command-label", type=str, default=None, help="Custom text for command label")
+    parser.add_argument('--version', action='version', version=version("cntdrun"))
+
     parser.add_argument("--window-width", type=int, default=250, help="Width of the window")
     parser.add_argument("--window-height", type=int, default=150, help="Height of the window")
     parser.add_argument("--window-x", type=int, default=None, help="X position of the window")
@@ -115,7 +125,8 @@ def main():
         args.window_width, args.window_height,
         args.label_font, args.label_size,
         args.button_text, args.button_font, args.button_size,
-        args.window_x, args.window_y
+        args.window_x, args.window_y,
+        args.command_label
     )
     window.show()
     sys.exit(app.exec_())
