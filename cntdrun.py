@@ -4,7 +4,7 @@ import subprocess
 from importlib.metadata import version
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QDesktopWidget
 from PyQt5.QtGui import QFont
-from PyQt5.QtCore import QTimer, Qt, QSize
+from PyQt5.QtCore import QTimer, Qt, QSize, QPoint
 
 class CountdownWindow(QMainWindow):
     def __init__(self, count, command, window_width, window_height,
@@ -59,6 +59,9 @@ class CountdownWindow(QMainWindow):
         self.timer.start(1000)
         self.command = command
 
+        self.dragging = False
+        self.offset = QPoint()
+
     def center(self):
         qr = self.frameGeometry()
         cp = QDesktopWidget().availableGeometry().center()
@@ -97,6 +100,19 @@ class CountdownWindow(QMainWindow):
     def keyPressEvent(self, event):
         if event.key() in (Qt.Key_Enter, Qt.Key_Return):
             self.close_button.click()
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.dragging = True
+            self.offset = event.pos()
+
+    def mouseMoveEvent(self, event):
+        if self.dragging:
+            self.move(event.globalPos() - self.offset)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.dragging = False
 
 def main():
     parser = argparse.ArgumentParser()
