@@ -31,7 +31,7 @@ class CountdownWindow(QMainWindow):
         main_layout = QVBoxLayout(central_widget)
 
 
-        self.command_label = QLabel(command_label_text if command_label_text else f"Command: {command}")
+        self.command_label = QLabel(command_label_text if command_label_text else f"{command}")
         self.command_label.setFont(QFont(label_font, label_size // 2))
         self.command_label.setAlignment(Qt.AlignCenter)
         self.command_label.setWordWrap(True)
